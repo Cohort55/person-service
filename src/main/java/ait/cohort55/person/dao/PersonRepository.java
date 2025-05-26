@@ -4,12 +4,12 @@ import ait.cohort55.person.model.Person;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDate;
-import java.util.Set;
+import java.util.stream.Stream;
 
 public interface PersonRepository extends JpaRepository<Person, Integer> {
-    Set<Person> findByNameIgnoreCase(String name);
+    Stream<Person> findByNameIgnoreCase(String name);
 
-    Set<Person> findByAddressCityIgnoreCase(String city);
+    Stream<Person> findByAddressCityIgnoreCase(String city);
 
-    Set<Person> findByBirthDateBetween(LocalDate from, LocalDate to);
+    Stream<Person> findByBirthDateBetween(LocalDate from, LocalDate to);
 }
