@@ -95,14 +95,14 @@ public class PersonServiceImpl implements PersonService, CommandLineRunner {
 
     @Override
     public EmployeeDto[] findEmployeesBySalary(int min, int max) {
-        // TODO
-        return new EmployeeDto[0];
+        Employee[] employees = personRepository.getEmployeesBySalaryBetween(min, max);
+        return modelMapper.map(employees, EmployeeDto[].class);
     }
 
     @Override
     public ChildDto[] getChildren() {
-        // TODO
-        return new ChildDto[0];
+        Child[] children = personRepository.getChildrenBy();
+        return modelMapper.map(children, ChildDto[].class);
     }
 
     @Override
