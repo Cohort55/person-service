@@ -29,27 +29,13 @@ public class PersonServiceImpl implements PersonService, CommandLineRunner {
         if (personRepository.existsById(personDto.getId())) {
             throw new ConflictException("Person with id " + personDto.getId() + " already exists");
         }
-        if (personDto instanceof ChildDto) {
-            personRepository.save(modelMapper.map(personDto, Child.class));
-            return;
-        }
-        if (personDto instanceof EmployeeDto) {
-            personRepository.save(modelMapper.map(personDto, Employee.class));
-            return;
-        }
-        personRepository.save(modelMapper.map(personDto, Person.class));
+        personRepository.save(mapper.mapToModel(personDto));
     }
 
     @Override
     public PersonDto getPersonById(Integer id) {
         Person person = personRepository.findById(id).orElseThrow(NotFoundException::new);
-        if (person instanceof Child) {
-            return modelMapper.map(person, ChildDto.class);
-        }
-        if (person instanceof Employee) {
-            return modelMapper.map(person, EmployeeDto.class);
-        }
-        return modelMapper.map(person, PersonDto.class);
+        return mapper.mapToDto(person);
     }
 
     @Transactional
@@ -57,7 +43,7 @@ public class PersonServiceImpl implements PersonService, CommandLineRunner {
     public PersonDto deletePersonById(Integer id) {
         Person person = personRepository.findById(id).orElseThrow(NotFoundException::new);
         personRepository.delete(person);
-        return modelMapper.map(person, PersonDto.class);
+        return mapper.mapToDto(person);
     }
 
     @Transactional
@@ -65,7 +51,7 @@ public class PersonServiceImpl implements PersonService, CommandLineRunner {
     public PersonDto updatePersonName(Integer id, String name) {
         Person person = personRepository.findById(id).orElseThrow(NotFoundException::new);
         person.setName(name);
-        return modelMapper.map(person, PersonDto.class);
+        return mapper.mapToDto(person);
     }
 
     @Transactional
@@ -73,14 +59,14 @@ public class PersonServiceImpl implements PersonService, CommandLineRunner {
     public PersonDto updatePersonAddress(Integer id, AddressDto addressDto) {
         Person person = personRepository.findById(id).orElseThrow(NotFoundException::new);
         person.setAddress(modelMapper.map(addressDto, Address.class));
-        return modelMapper.map(person, PersonDto.class);
+        return mapper.mapToDto(person);
     }
 
     @Transactional(readOnly = true)
     @Override
     public PersonDto[] findPersonsByName(String name) {
         return personRepository.findByNameIgnoreCase(name)
-                .map(p -> modelMapper.map(p, PersonDto.class))
+                .map(mapper::mapToDto)
                 .toArray(PersonDto[]::new);
     }
 
@@ -88,7 +74,7 @@ public class PersonServiceImpl implements PersonService, CommandLineRunner {
     @Override
     public PersonDto[] findPersonsByCity(String city) {
         return personRepository.findByAddressCityIgnoreCase(city)
-                .map(p -> modelMapper.map(p, PersonDto.class))
+                .map(mapper::mapToDto)
                 .toArray(PersonDto[]::new);
     }
 
@@ -98,7 +84,7 @@ public class PersonServiceImpl implements PersonService, CommandLineRunner {
         LocalDate from = LocalDate.now().minusYears(maxAge);
         LocalDate to = LocalDate.now().minusYears(minAge);
         return personRepository.findByBirthDateBetween(from, to)
-                .map(p -> modelMapper.map(p, PersonDto.class))
+                .map(mapper::mapToDto)
                 .toArray(PersonDto[]::new);
     }
 
@@ -108,7 +94,19 @@ public class PersonServiceImpl implements PersonService, CommandLineRunner {
     }
 
     @Override
-    public void run(String... args) throws Exception {
+    public EmployeeDto[] findEmployeesBySalary(int min, int max) {
+        // TODO
+        return new EmployeeDto[0];
+    }
+
+    @Override
+    public ChildDto[] getChildren() {
+        // TODO
+        return new ChildDto[0];
+    }
+
+    @Override
+    public void run(String... args) {
         if (personRepository.count() == 0) {
             Person person = new Person(1000, "John", LocalDate.of(1985, 3, 11),
                     new Address("Dortmund", "Berlinerstrasse", 15));
